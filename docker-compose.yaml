@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+   mysql-standalone:
+     image: mysql:8.0
+     container_name: mysql-standalone
+     networks:
+      - spring-boot-mysql-network
+     environment:
+       MYSQL_RANDOM_ROOT_PASSWORD: admin
+       MYSQL_DATABASE: HMS
+       MYSQL_PASSWORD: admin
+     restart: always
+
+   webapp:
+     image: as6779/webapp:v1
+     container_name: docker-springboot
+     networks:
+      - spring-boot-mysql-network
+     ports:
+       - "8086:8086"
+     depends_on:
+      - mysql-service
+
+networks:
+  spring-boot-mysql-network:
+    driver: bridge         
