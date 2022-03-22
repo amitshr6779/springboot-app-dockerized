@@ -15,6 +15,8 @@ pipeline {
         }
         stage('Run Mysql Conatiner'){
             steps {
+		sh "docker kill mysql-standalone"
+		sh "docker kill java-web-app"
                 sh "docker run --rm --name mysql-standalone -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=HMS -e MYSQL_PASSWORD=admin -d mysql:8.0"
             }
         }
