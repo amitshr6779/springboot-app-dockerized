@@ -15,13 +15,31 @@ pipeline {
         }
         stage('Run Mysql Conatiner'){
             steps {
-		sh "docker kill mysql-standalone"
-		sh "docker kill java-web-app"
-                sh "docker run --rm --name mysql-standalone -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=HMS -e MYSQL_PASSWORD=admin -d mysql:8.0"
+            sh(returnStdout: true, script: '''#!/bin/bash
+            docker ps -a --format \'{{.Names}}\' | grep -Eq "mysql-standalone"
+            DBexists=$?
+            if (( $DBexists == 0 ));
+            then
+            docker kill mysql-standalone
+            else
+             echo "Starting mysql conatiner"
+            fi
+            '''.stripIndent())
+            sh "docker run --rm --name mysql-standalone -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=HMS -e MYSQL_PASSWORD=admin -d mysql:8.0"
             }
         }
         stage('Run springboot container ') {
             steps {
+                sh(returnStdout: true, script: '''#!/bin/bash
+                docker ps -a --format \'{{.Names}}\' | grep -Eq "java-web-app"
+                DBexists=$?
+                if (( $DBexists == 0 ));
+                then
+                docker kill java-web-app
+                else
+                echo "Starting java-web-app conatiner"
+                fi
+                '''.stripIndent())
                 sh "sleep 120"
                 sh "docker run -p 8086:8086  --rm --name java-web-app --link mysql-standalone:mysql -d as6779/java-web-app:$BUILD_NUMBER"
             }
@@ -31,7 +49,13 @@ pipeline {
             steps {
                 script {
                     notifyEvents message: "Please <a href='${BUILD_URL}/input'>click here</a> to approve Docker Push : as6779/java-web-app:${BUILD_ID}", token: "iYINho7IsVUWIt9SFqQGBkWxpe5yD-A5"
+                    emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: '$DEFAULT_RECIPIENTS'
                     userInput = input submitter: '', message: "Do you approve to push as6779/java-web-app:${BUILD_ID} ?"
+                }
+            }
+            post {
+                aborted {
+                            mail bcc: '', body: 'BUILD Failed Due to Timeout', cc: '', from: '', replyTo: '', subject: 'BUILD ABORTED', to: 'amitshr6779@gmail.com'
                 }
             }
         }
