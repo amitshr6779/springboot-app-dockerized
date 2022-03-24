@@ -50,7 +50,7 @@ pipeline {
                 script {
                     notifyEvents message: "Please <a href='${BUILD_URL}/input'>click here</a> to approve Docker Push : as6779/java-web-app:${BUILD_ID}", token: "iYINho7IsVUWIt9SFqQGBkWxpe5yD-A5"
                     emailext body: '$DEFAULT_CONTENT', subject: '$DEFAULT_SUBJECT', to: '$DEFAULT_RECIPIENTS'
-                    userInput = input submitter: '', message: "Do you approve to push as6779/java-web-app:${BUILD_ID} ?"
+		    input message: "Do you want approve to push as6779/java-web-app:${BUILD_ID} ?" , submitter: 'test'
                 }
             }
             post {
