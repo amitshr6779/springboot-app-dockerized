@@ -55,7 +55,7 @@ pipeline {
                 }
             }
             post {
-                sucess {
+                success {
                             mail bcc: '', body: 'BUILD: ${BUILD_NUMBER}  is approved by ${SUBMITTER_USERNAME}', cc: '', from: '', replyTo: '', subject: 'BUILDi ${BUILD_NUMBER} APPROVED', to: 'amitshr6779@gmail.com'
                 }
             }
